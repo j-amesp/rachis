@@ -1,0 +1,44 @@
+# RACHIS connector — example configuration
+# Secrets (DB DSN, HSM PIN) come from the environment as ${VAR}, never from this file.
+
+identity:
+  source_identity: "urn:example:org:natmaritime-authority"
+  connector_measurement: "software:dev"   # attestation stand-in (thesis §16.3)
+
+core:
+  base_url: "https://core.rachis.example"
+  public_key_hex: "REPLACE_WITH_CORE_PUBLIC_KEY_HEX"
+  expectation_canonical: "urn:rachis:expectation:maritime:vessel"
+  poll_interval_seconds: 3600
+
+source:
+  kind: "json"
+  json_input_path: "./data/vessels.json"
+  # for a database source instead:
+  # kind: "postgres"
+  # dsn: "${SOURCE_DB_DSN}"
+
+keystore:
+  backend: "software"                       # "software" | "pkcs11"
+  signing_key_id: "source-signing"
+  software_key_path: "/var/lib/rachis-connector/signing.key"
+  # for a real HSM:
+  # backend: "pkcs11"
+  # pkcs11_library: "/usr/lib/softhsm/libsofthsm2.so"
+  # pkcs11_slot: 0
+  # pkcs11_pin: "${HSM_PIN}"
+
+state:
+  data_dir: "/var/lib/rachis-connector"
+
+marking:
+  policy_id: "urn:rachis:policy:nato-amoco-demo"
+  levels: ["UNMARKED", "RESTRICTED", "GENERAL", "SECRET"]
+
+mapping_path: "./config/mapping.yaml"
+policy_path: "./config/policy.yaml"
+
+# Hash-only correlation is OFF by default. The single-key stand-in permits offline
+# enumeration of low-entropy values (thesis §16.6). Only enable with the threshold OPRF,
+# or knowingly for a closed test.
+enable_hash_only_correlation: false
