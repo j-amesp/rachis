@@ -1,0 +1,44 @@
+# RACHIS disclosure policy — maritime vessel (thesis Appendix A.5)
+# Separate artefact from the mapping, approved by the information asset owner (§9.1).
+
+policy_id: "urn:example:policy:natmaritime-vessel:3:2"
+approved_by: "Information Asset Owner, Maritime Directorate"
+approved_at: "2026-03-11"
+default: withheld
+
+dispositions:
+  imoNumber: clear
+  currentName: clear
+  priorNames: clear
+  flagState: clear
+  callSign: clear
+  mmsi: clear
+  grossTonnage: clear
+  registeredOwner: clear
+  lastPortCall.departedAt: clear
+  beneficialOwner: hash-only
+  lastKnownPosition.lat: pointer
+  lastKnownPosition.lon: pointer
+  # observedAt demoted CLEAR -> POINTER as the secondary-suppression resolution (§9.5)
+  lastKnownPosition.observedAt: pointer
+  assessment.summary: pointer
+
+derivations:
+  # coarse: a port call locates the vessel to ~200km, which does not defeat the precise
+  # position protection. Accepted.
+  - field: lastKnownPosition.lat
+    derivable_from: [lastPortCall.locode, lastPortCall.departedAt]
+    granularity: coarse
+    protects_at: exact
+    accepted: true
+    rationale: "Port call locates to ~200km; does not defeat precise-position protection."
+
+  # exact: revisit interval would disclose collection means exactly. Resolved by demoting
+  # observedAt to pointer above, so the deriving set is no longer permissive. Accepted
+  # because the resolution has been applied.
+  - field: collectionMeans
+    derivable_from: [lastKnownPosition.observedAt, lastPortCall.departedAt]
+    granularity: exact
+    protects_at: exact
+    accepted: true
+    rationale: "Resolved by demoting observedAt to pointer (see dispositions)."

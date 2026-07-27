@@ -1,0 +1,75 @@
+# RACHIS mapping — VSL_MASTER -> maritime:vessel Expectation (thesis Appendix A.4)
+# Declarative only: every transform is a named library function. No code.
+
+mapping_id: "urn:example:mapping:natmaritime-vslmaster:1:4"
+expectation: "urn:rachis:expectation:maritime:vessel:2:1"
+source_table: "VSL_MASTER"
+
+fields:
+  - target: imoNumber
+    source: IMO_NO
+    transforms: [{fn: prefix, arg: "IMO"}]
+    classification: UNMARKED
+
+  - target: currentName
+    source: VSL_NM
+    transforms: [{fn: trim}, {fn: upper}]
+    classification: UNMARKED
+
+  - target: priorNames
+    source: VSL_NM_PREV
+    transforms: [{fn: split, arg: "|"}]
+    classification: UNMARKED
+
+  - target: flagState
+    source: FLAG_CD
+    transforms:
+      - fn: codelist
+        table: {GB: GBR, PA: PAN, LR: LBR, MH: MHL}
+    classification: UNMARKED
+
+  - target: callSign
+    source: CALL_SGN
+    transforms: [{fn: trim}, {fn: upper}]
+    classification: UNMARKED
+
+  - target: mmsi
+    source: MMSI_NO
+    classification: UNMARKED
+
+  - target: grossTonnage
+    source: GT
+    transforms: [{fn: to_int}]
+    classification: UNMARKED
+
+  - target: registeredOwner
+    source: OWNR_REG_NM
+    transforms: [{fn: trim}]
+    classification: UNMARKED
+
+  - target: beneficialOwner
+    source: OWNR_BEN_NM
+    transforms: [{fn: trim}]
+    classification: GENERAL
+
+  - target: lastPortCall.departedAt
+    source: PORT_DEP_DTM
+    classification: UNMARKED
+
+  - target: lastKnownPosition.lat
+    source: POS_LAT
+    transforms: [{fn: to_float}]
+    classification: RESTRICTED
+
+  - target: lastKnownPosition.lon
+    source: POS_LON
+    transforms: [{fn: to_float}]
+    classification: RESTRICTED
+
+  - target: lastKnownPosition.observedAt
+    source: POS_DTM
+    classification: RESTRICTED
+
+  - target: assessment.summary
+    source: ASSESS_TXT
+    classification: GENERAL
